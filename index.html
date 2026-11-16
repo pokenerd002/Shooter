@@ -4,538 +4,1008 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Monster Mayhem - Wave Survival</title>
+<title>Monster Mayhem 3D</title>
+
 <style>
 *{box-sizing:border-box}
 body{
- margin:0;background:#101322;color:white;
- font-family:Arial,sans-serif;overflow:hidden;
+ margin:0;overflow:hidden;background:#101322;color:white;
+ font-family:Arial,sans-serif;
 }
-#gameWrap{height:100vh;display:flex;flex-direction:column}
+#game{position:fixed;inset:0}
+canvas{display:block}
 header{
- height:65px;background:#191e32;border-bottom:2px solid #e8b94f;
+ position:absolute;top:0;left:0;right:0;height:65px;
+ background:#171d31eF;border-bottom:2px solid #e9ba52;
  display:flex;align-items:center;justify-content:space-between;
- padding:0 20px;gap:12px;z-index:2;
+ padding:0 20px;z-index:3;gap:10px;
 }
-.logo{font-size:22px;font-weight:900;color:#ffd36a;letter-spacing:1px}
-.stats{display:flex;gap:18px;font-weight:bold;font-size:14px;flex-wrap:wrap}
-.stat span{color:#ffd36a}
-#gameArea{position:relative;flex:1;min-height:0;background:#151a2b}
-canvas{width:100%;height:100%;display:block;cursor:crosshair}
-#bottom{
- height:48px;background:#191e32;display:flex;align-items:center;
- justify-content:center;color:#aeb7d0;font-size:12px;
- border-top:1px solid #303750;text-align:center;padding:5px;
+.logo{font-size:21px;font-weight:900;color:#ffd36a}
+.stats{display:flex;gap:20px;font-weight:bold;font-size:14px}
+.stats span{color:#ffd36a}
+#healthBox{
+ position:absolute;bottom:22px;left:22px;width:220px;z-index:3;
 }
-.overlay{
- position:absolute;inset:0;background:#090d19dd;
- display:flex;align-items:center;justify-content:center;
- z-index:5;padding:16px;overflow:auto;
+#healthLabel{font-size:13px;font-weight:bold;margin-bottom:6px}
+#healthBar{
+ height:17px;background:#34394d;border:1px solid #ffffff66;
+ border-radius:20px;overflow:hidden;
 }
-.panel{
- background:#202740;border:2px solid #d8ad4d;border-radius:18px;
- padding:28px;width:min(650px,95vw);text-align:center;
- box-shadow:0 15px 60px #0009;
+#healthFill{
+ height:100%;width:100%;background:#54e18b;transition:width .2s;
 }
-h1{font-size:clamp(30px,6vw,48px);color:#ffd36a;margin:0 0 8px}
-h2{color:#ffd36a;margin:0 0 12px}
-p{color:#c6cde0;line-height:1.5}
-button{
- background:#e9b94f;color:#191b25;border:0;border-radius:10px;
- padding:13px 20px;font-weight:900;font-size:15px;cursor:pointer;
- transition:.15s;
-}
-button:hover{transform:translateY(-2px);filter:brightness(1.1)}
-button:disabled{opacity:.5;cursor:not-allowed}
-#upgradeChoices{
- display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px;
-}
-.upgrade{
- background:#303b59;border:1px solid #66769d;color:white;
- border-radius:12px;padding:16px 10px;min-height:155px;
-}
-.upgrade strong{display:block;color:#ffd36a;font-size:17px;margin-bottom:8px}
-.upgrade small{color:#d1d8eb;line-height:1.4}
-.emoji{font-size:35px;display:block;margin-bottom:8px}
-.hidden{display:none!important}
-#healthOuter{
- position:absolute;left:18px;bottom:18px;width:190px;height:15px;
- background:#343a4e;border:1px solid #ffffff55;border-radius:20px;overflow:hidden;
-}
-#healthInner{height:100%;width:100%;background:#52df85;transition:width .2s}
-#healthLabel{
- position:absolute;left:18px;bottom:38px;font-size:12px;
- font-weight:bold;text-shadow:1px 1px 3px black;
+#controls{
+ position:absolute;bottom:20px;right:20px;
+ color:#d7dcef;background:#171d31d9;
+ border:1px solid #59617a;border-radius:10px;
+ padding:12px;font-size:12px;line-height:1.8;z-index:3;
 }
 #toast{
- position:absolute;top:18px;left:50%;transform:translateX(-50%);
- background:#202740dd;border:1px solid #e9b94f;border-radius:10px;
- padding:10px 18px;font-weight:bold;pointer-events:none;
+ position:absolute;top:82px;left:50%;transform:translateX(-50%);
+ padding:12px 20px;border-radius:10px;
+ background:#202944ee;border:1px solid #e9ba52;
+ font-weight:bold;z-index:4;pointer-events:none;
 }
+.overlay{
+ position:absolute;inset:0;z-index:5;
+ display:flex;align-items:center;justify-content:center;
+ background:#090d19cc;padding:15px;overflow:auto;
+}
+.hidden{display:none!important}
+.panel{
+ width:min(650px,95vw);background:#202740;
+ border:2px solid #e9ba52;border-radius:18px;
+ padding:28px;text-align:center;
+ box-shadow:0 15px 60px #0009;
+}
+h1{font-size:clamp(30px,6vw,48px);color:#ffd36a;margin:0 0 10px}
+h2{color:#ffd36a}
+p{color:#cbd2e5;line-height:1.5}
+button{
+ background:#e9ba52;color:#171b28;border:0;
+ padding:13px 20px;border-radius:10px;
+ font-weight:900;font-size:15px;cursor:pointer;
+}
+button:hover{filter:brightness(1.15);transform:translateY(-2px)}
+#upgradeChoices{
+ display:grid;grid-template-columns:repeat(3,1fr);
+ gap:12px;margin-top:20px;
+}
+.upgrade{
+ background:#303c5c;color:white;border:1px solid #65769e;
+ min-height:160px;padding:15px 10px;
+}
+.upgrade strong{
+ display:block;color:#ffd36a;margin:8px 0;font-size:16px;
+}
+.upgrade small{color:#d3d9e8;line-height:1.5}
+.upgrade .emoji{font-size:35px}
+#bossBar{
+ position:absolute;top:80px;left:50%;transform:translateX(-50%);
+ width:min(350px,70vw);z-index:3;display:none;
+}
+#bossName{text-align:center;font-weight:bold;color:#ff8c9a;margin-bottom:5px}
+#bossHealth{height:12px;background:#34394d;border-radius:10px;overflow:hidden}
+#bossHealthFill{height:100%;width:100%;background:#ff566d}
 @media(max-width:600px){
  header{height:auto;min-height:65px;padding:10px;flex-wrap:wrap}
- .logo{font-size:17px}
- .stats{gap:10px;font-size:12px}
+ .logo{font-size:16px}
+ .stats{font-size:11px;gap:10px}
+ #controls{font-size:10px;bottom:75px;right:10px}
+ #healthBox{bottom:15px;left:10px;width:160px}
  #upgradeChoices{grid-template-columns:1fr}
  .upgrade{min-height:100px}
- #bottom{font-size:10px}
 }
 </style>
 </head>
+
 <body>
-<div id="gameWrap">
+<div id="game"></div>
+
 <header>
- <div class="logo">👾 MONSTER MAYHEM</div>
+ <div class="logo">👾 MONSTER MAYHEM 3D</div>
  <div class="stats">
-  <div class="stat">WAVE: <span id="wave">0</span></div>
-  <div class="stat">SCORE: <span id="score">0</span></div>
-  <div class="stat">MONSTERS: <span id="remaining">0</span></div>
+  <div>WAVE: <span id="wave">0</span></div>
+  <div>SCORE: <span id="score">0</span></div>
+  <div>MONSTERS: <span id="remaining">0</span></div>
  </div>
 </header>
 
-<div id="gameArea">
- <canvas id="game"></canvas>
- <div id="healthLabel">HEALTH</div>
- <div id="healthOuter"><div id="healthInner"></div></div>
- <div id="toast" class="hidden"></div>
+<div id="healthBox">
+ <div id="healthLabel">PLAYER HEALTH</div>
+ <div id="healthBar"><div id="healthFill"></div></div>
+</div>
 
- <div class="overlay" id="startScreen">
-  <div class="panel">
-   <h1>MONSTER MAYHEM</h1>
-   <div style="font-size:65px;margin:10px">👾 🐸 👻</div>
-   <h2>WAVE SURVIVAL</h2>
-   <p>Goofy monsters are taking over! Grab your energy blaster and see how many waves you can survive.</p>
-   <p><b>WASD</b> to move · <b>Mouse</b> to aim · <b>Click or Space</b> to fire</p>
-   <button id="startBtn">START GAME</button>
-  </div>
- </div>
+<div id="controls">
+ <b>WASD</b> — Move<br>
+ <b>MOUSE</b> — Aim<br>
+ <b>LEFT CLICK</b> — Shoot<br>
+ <b>SHIFT</b> — Sprint
+</div>
 
- <div class="overlay hidden" id="upgradeScreen">
-  <div class="panel">
-   <h1>WAVE CLEARED!</h1>
-   <div style="font-size:48px;margin:8px">🏆</div>
-   <h2>CHOOSE AN UPGRADE</h2>
-   <p>Your next wave is waiting. Pick one upgrade to improve your blaster or your character.</p>
-   <div id="upgradeChoices"></div>
-  </div>
- </div>
+<div id="bossBar">
+ <div id="bossName">MEGA GOO</div>
+ <div id="bossHealth"><div id="bossHealthFill"></div></div>
+</div>
 
- <div class="overlay hidden" id="gameOverScreen">
-  <div class="panel">
-   <h1>GAME OVER!</h1>
-   <div style="font-size:60px">💫</div>
-   <h2 id="finalWave">You survived 0 waves</h2>
-   <p id="finalScore">Final score: 0</p>
-   <button id="restartBtn">PLAY AGAIN</button>
-  </div>
+<div id="toast" class="hidden"></div>
+
+<div class="overlay" id="startScreen">
+ <div class="panel">
+  <h1>MONSTER MAYHEM</h1>
+  <div style="font-size:65px">👾 🐸 👻</div>
+  <h2>3D WAVE SURVIVAL</h2>
+  <p>Enter the arena and survive waves of goofy monsters! Upgrade your blaster and become the ultimate monster survivor.</p>
+  <p><b>WASD</b> to move · <b>Mouse</b> to aim · <b>Click</b> to shoot</p>
+  <button id="startButton">ENTER THE ARENA</button>
  </div>
 </div>
-<div id="bottom">WASD / ARROW KEYS: MOVE &nbsp; • &nbsp; MOUSE: AIM &nbsp; • &nbsp; CLICK / SPACE: FIRE</div>
+
+<div class="overlay hidden" id="upgradeScreen">
+ <div class="panel">
+  <h1>WAVE CLEARED!</h1>
+  <div style="font-size:50px">🏆</div>
+  <h2>CHOOSE AN UPGRADE</h2>
+  <p>Pick one improvement before the next wave begins.</p>
+  <div id="upgradeChoices"></div>
+ </div>
 </div>
+
+<div class="overlay hidden" id="gameOverScreen">
+ <div class="panel">
+  <h1>GAME OVER!</h1>
+  <div style="font-size:60px">💫</div>
+  <h2 id="finalWave">You reached wave 0</h2>
+  <p id="finalScore">Final score: 0</p>
+  <button id="restartButton">PLAY AGAIN</button>
+ </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 <script>
 (() => {
 "use strict";
 
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
-const area=document.getElementById("gameArea");
+const THREE=window.THREE;
+if(!THREE){
+ document.getElementById("game").innerHTML=
+ '<div style="color:white;padding:30px">Could not load the 3D engine. Check your internet connection and refresh.</div>';
+ return;
+}
+
+const game=document.getElementById("game");
 
 const ui={
  wave:document.getElementById("wave"),
  score:document.getElementById("score"),
  remaining:document.getElementById("remaining"),
- health:document.getElementById("healthInner"),
+ health:document.getElementById("healthFill"),
  start:document.getElementById("startScreen"),
  upgrades:document.getElementById("upgradeScreen"),
  over:document.getElementById("gameOverScreen"),
  choices:document.getElementById("upgradeChoices"),
- toast:document.getElementById("toast")
+ toast:document.getElementById("toast"),
+ boss:document.getElementById("bossBar"),
+ bossHealth:document.getElementById("bossHealthFill")
 };
 
-let W=800,H=600;
-let running=false,paused=false,gameOver=false;
-let wave=0,score=0,spawnLeft=0,spawnTimer=0;
-let monsters=[],shots=[],particles=[],keys={};
-let lastTime=0,fireTimer=0,toastTimer=0;
-let mouse={x:400,y:300,down:false};
-let player;
-let selectedUpgradeIds=[];
+// ---------------------------------
+// THREE.JS SCENE
+// ---------------------------------
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x11182a);
+scene.fog=new THREE.Fog(0x11182a,35,85);
+
+const camera=new THREE.PerspectiveCamera(
+ 65,window.innerWidth/window.innerHeight,.1,150
+);
+
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+game.appendChild(renderer.domElement);
+
+// Lighting
+scene.add(new THREE.HemisphereLight(0x9ecbff,0x27301e,2));
+
+const sunlight=new THREE.DirectionalLight(0xffffff,2.2);
+sunlight.position.set(-12,25,12);
+sunlight.castShadow=true;
+sunlight.shadow.mapSize.set(2048,2048);
+scene.add(sunlight);
+
+// Arena
+const arenaSize=60;
+const floor=new THREE.Mesh(
+ new THREE.PlaneGeometry(arenaSize,arenaSize),
+ new THREE.MeshStandardMaterial({color:0x303d48,roughness:.9})
+);
+floor.rotation.x=-Math.PI/2;
+floor.receiveShadow=true;
+scene.add(floor);
+
+const grid=new THREE.GridHelper(arenaSize,60,0x60748a,0x45566b);
+grid.position.y=.015;
+scene.add(grid);
+
+// Arena walls
+const wallMaterial=new THREE.MeshStandardMaterial({
+ color:0x283754,roughness:.75
+});
+
+function addWall(x,z,sx,sz){
+ const wall=new THREE.Mesh(
+  new THREE.BoxGeometry(sx,3,sz),wallMaterial
+ );
+ wall.position.set(x,1.5,z);
+ wall.castShadow=true;
+ wall.receiveShadow=true;
+ scene.add(wall);
+}
+addWall(0,-30,60,1);
+addWall(0,30,60,1);
+addWall(-30,0,1,60);
+addWall(30,0,1,60);
+
+// Arena decorations and obstacles
+const obstacles=[];
+const obstacleMaterial=new THREE.MeshStandardMaterial({
+ color:0x566c89,roughness:.65
+});
+
+for(let i=0;i<12;i++){
+ const x=(Math.random()-.5)*45;
+ const z=(Math.random()-.5)*45;
+ if(Math.hypot(x,z)<10)continue;
+
+ const box=new THREE.Mesh(
+  new THREE.BoxGeometry(2.5,1.5,2.5),
+  obstacleMaterial
+ );
+ box.position.set(x,.75,z);
+ box.castShadow=true;
+ box.receiveShadow=true;
+ scene.add(box);
+ obstacles.push({x,z,r:2});
+}
+
+// Decorative lights
+for(let i=0;i<4;i++){
+ const light=new THREE.PointLight(
+  i%2?0x48bfff:0xffd36a,35,20
+ );
+ const positions=[
+  [-25,5,-25],[25,5,-25],[-25,5,25],[25,5,25]
+ ];
+ light.position.set(...positions[i]);
+ scene.add(light);
+}
+
+// ---------------------------------
+// GAME STATE
+// ---------------------------------
+
+let player=null;
+let monsters=[];
+let projectiles=[];
+let effects=[];
+let keys={};
+
+let wave=0;
+let score=0;
+let spawnLeft=0;
+let spawnTimer=0;
+let fireTimer=0;
+let running=false;
+let paused=false;
+let gameOver=false;
+let lastTime=0;
+let toastTimeout=null;
+
+const raycaster=new THREE.Raycaster();
+const pointer=new THREE.Vector2();
+const groundPlane=new THREE.Plane(
+ new THREE.Vector3(0,1,0),0
+);
+const aimPoint=new THREE.Vector3();
 
 const monsterTypes=[
- {name:"GLOOP",emoji:"🟢",color:"#72e56e",hp:2,speed:65,size:18,damage:8,points:10},
- {name:"PURPLE PUFF",emoji:"🟣",color:"#b88aff",hp:3,speed:48,size:23,damage:11,points:15},
- {name:"ANGRY CHICKEN",emoji:"🐔",color:"#ffce57",hp:2,speed:105,size:17,damage:7,points:12},
- {name:"GHOSTY",emoji:"👻",color:"#a9edff",hp:4,speed:55,size:22,damage:12,points:20},
- {name:"TOILET GREMLIN",emoji:"🚽",color:"#d5e2ed",hp:7,speed:35,size:29,damage:17,points:35}
+ {name:"GLOOP",emoji:"🟢",color:0x72e56e,hp:2,speed:3.2,size:1,damage:8,points:10},
+ {name:"PURPLE PUFF",emoji:"🟣",color:0xb88aff,hp:3,speed:2.4,size:1.2,damage:11,points:15},
+ {name:"ANGRY CHICKEN",emoji:"🐔",color:0xffce57,hp:2,speed:4.2,size:.9,damage:7,points:12},
+ {name:"GHOSTY",emoji:"👻",color:0xa9edff,hp:4,speed:2.7,size:1.2,damage:12,points:20},
+ {name:"TOILET GREMLIN",emoji:"🚽",color:0xd5e2ed,hp:7,speed:1.8,size:1.5,damage:17,points:35}
 ];
 
 const upgrades=[
- {id:"damage",emoji:"💥",name:"POWER BLAST",desc:"Increase energy projectile damage by 1.",apply:p=>p.damage+=1},
- {id:"speed",emoji:"⚡",name:"QUICK TRIGGER",desc:"Shoot energy blasts more frequently.",apply:p=>p.fireRate=Math.max(0.11,p.fireRate*.78)},
- {id:"health",emoji:"❤️",name:"EXTRA HEART",desc:"Increase maximum health by 25 and heal 25.",apply:p=>{p.maxHealth+=25;p.health=Math.min(p.maxHealth,p.health+25)}},
- {id:"movement",emoji:"👟",name:"SPEEDY SHOES",desc:"Move around the arena faster.",apply:p=>p.speed+=30},
- {id:"spread",emoji:"🌟",name:"TRIPLE BLAST",desc:"Fire additional energy projectiles.",apply:p=>p.spread=Math.min(5,p.spread+1)},
- {id:"pierce",emoji:"✨",name:"BOUNCY ENERGY",desc:"Energy blasts can pass through more monsters.",apply:p=>p.pierce+=1},
- {id:"bigshot",emoji:"🔮",name:"BIG ORBS",desc:"Make your energy projectiles larger.",apply:p=>p.shotSize+=2},
- {id:"armor",emoji:"🛡️",name:"ENERGY SHIELD",desc:"Reduce monster contact damage.",apply:p=>p.armor=Math.min(.65,p.armor+.15)}
+ {
+  emoji:"💥",name:"POWER BLAST",
+  desc:"Increase projectile damage.",
+  apply:p=>p.damage++
+ },
+ {
+  emoji:"⚡",name:"QUICK TRIGGER",
+  desc:"Shoot energy blasts faster.",
+  apply:p=>p.fireRate=Math.max(.09,p.fireRate*.78)
+ },
+ {
+  emoji:"❤️",name:"EXTRA HEART",
+  desc:"Increase maximum health and heal.",
+  apply:p=>{p.maxHealth+=25;p.health=Math.min(p.maxHealth,p.health+25)}
+ },
+ {
+  emoji:"👟",name:"SPEEDY SHOES",
+  desc:"Move around the arena faster.",
+  apply:p=>p.speed+=1
+ },
+ {
+  emoji:"🌟",name:"TRIPLE BLAST",
+  desc:"Fire additional projectiles.",
+  apply:p=>p.spread=Math.min(5,p.spread+1)
+ },
+ {
+  emoji:"✨",name:"BOUNCY ENERGY",
+  desc:"Projectiles can pass through more monsters.",
+  apply:p=>p.pierce++
+ },
+ {
+  emoji:"🔮",name:"BIG ORBS",
+  desc:"Make projectiles larger.",
+  apply:p=>p.shotSize+=.12
+ },
+ {
+  emoji:"🛡️",name:"ENERGY SHIELD",
+  desc:"Reduce contact damage.",
+  apply:p=>p.armor=Math.min(.7,p.armor+.15)
+ }
 ];
 
-function resize(){
- const rect=area.getBoundingClientRect();
- const dpr=Math.min(window.devicePixelRatio||1,2);
- W=rect.width;H=rect.height;
- canvas.width=Math.floor(W*dpr);
- canvas.height=Math.floor(H*dpr);
- ctx.setTransform(dpr,0,0,dpr,0,0);
-}
-window.addEventListener("resize",resize);
-resize();
+// ---------------------------------
+// PLAYER MODEL
+// ---------------------------------
 
-function newPlayer(){
+function createPlayer(){
+ const group=new THREE.Group();
+
+ const body=new THREE.Mesh(
+  new THREE.CapsuleGeometry(.55,.8,5,10),
+  new THREE.MeshStandardMaterial({
+   color:0x398fe0,roughness:.45
+  })
+ );
+ body.position.y=1.05;
+ body.castShadow=true;
+ group.add(body);
+
+ const head=new THREE.Mesh(
+  new THREE.SphereGeometry(.48,20,16),
+  new THREE.MeshStandardMaterial({color:0x65baff})
+ );
+ head.position.y=2;
+ head.castShadow=true;
+ group.add(head);
+
+ // Eyes
+ const eyeMaterial=new THREE.MeshStandardMaterial({color:0xffffff});
+ const pupilMaterial=new THREE.MeshStandardMaterial({color:0x172238});
+
+ for(const x of [-.17,.17]){
+  const eye=new THREE.Mesh(
+   new THREE.SphereGeometry(.09,12,12),eyeMaterial
+  );
+  eye.position.set(x,2.08,.39);
+  group.add(eye);
+
+  const pupil=new THREE.Mesh(
+   new THREE.SphereGeometry(.045,10,10),pupilMaterial
+  );
+  pupil.position.set(x,2.08,.465);
+  group.add(pupil);
+ }
+
+ // Blaster
+ const gun=new THREE.Group();
+
+ const gunBody=new THREE.Mesh(
+  new THREE.BoxGeometry(.3,.25,1.05),
+  new THREE.MeshStandardMaterial({
+   color:0xffc64d,metalness:.35,roughness:.4
+  })
+ );
+ gunBody.position.z=.3;
+ gun.add(gunBody);
+
+ const barrel=new THREE.Mesh(
+  new THREE.CylinderGeometry(.09,.09,.35,12),
+  new THREE.MeshStandardMaterial({color:0x8df5ff,emissive:0x166b88})
+ );
+ barrel.rotation.x=Math.PI/2;
+ barrel.position.set(0,.03,.95);
+ gun.add(barrel);
+
+ gun.position.set(.55,1.35,.65);
+ group.add(gun);
+
+ const glow=new THREE.PointLight(0x65eaff,1.2,3);
+ glow.position.set(.5,1.4,1);
+ group.add(glow);
+
+ group.position.set(0,0,0);
+ scene.add(group);
+
  return {
-  x:W/2,y:H/2,r:17,health:100,maxHealth:100,
-  speed:230,damage:1,fireRate:.32,spread:1,
-  pierce:0,shotSize:6,armor:0,invulnerable:0
+  group,health:100,maxHealth:100,
+  speed:9,damage:1,fireRate:.32,
+  spread:1,pierce:0,shotSize:.16,
+  armor:0,invulnerable:0
  };
 }
 
-function startGame(){
- wave=0;score=0;monsters=[];shots=[];particles=[];
- player=newPlayer();
- running=true;paused=false;gameOver=false;
- ui.start.classList.add("hidden");
- ui.over.classList.add("hidden");
- ui.upgrades.classList.add("hidden");
- nextWave();
+// ---------------------------------
+// MONSTERS
+// ---------------------------------
+
+function createMonsterModel(color,size){
+ const group=new THREE.Group();
+
+ const body=new THREE.Mesh(
+  new THREE.SphereGeometry(size,20,16),
+  new THREE.MeshStandardMaterial({
+   color,roughness:.6
+  })
+ );
+ body.scale.y=1.05;
+ body.position.y=size;
+ body.castShadow=true;
+ group.add(body);
+
+ // Googly eyes
+ const eyeMat=new THREE.MeshStandardMaterial({color:0xffffff});
+ const pupilMat=new THREE.MeshStandardMaterial({color:0x151b28});
+
+ for(const x of [-.3,.3]){
+  const eye=new THREE.Mesh(
+   new THREE.SphereGeometry(size*.2,12,12),eyeMat
+  );
+  eye.position.set(x*size, size*1.35,size*.78);
+  group.add(eye);
+
+  const pupil=new THREE.Mesh(
+   new THREE.SphereGeometry(size*.1,10,10),pupilMat
+  );
+  pupil.position.set(x*size,size*1.35,size*.95);
+  group.add(pupil);
+ }
+
+ // Little mouth
+ const mouth=new THREE.Mesh(
+  new THREE.SphereGeometry(size*.13,12,10),
+  new THREE.MeshStandardMaterial({color:0x25202b})
+ );
+ mouth.scale.set(1,.45,.5);
+ mouth.position.set(0,size*.85,size*.94);
+ group.add(mouth);
+
+ // Tiny feet
+ for(const x of [-.35,.35]){
+  const foot=new THREE.Mesh(
+   new THREE.SphereGeometry(size*.25,12,10),
+   new THREE.MeshStandardMaterial({color:0x34303b})
+  );
+  foot.position.set(x*size,.12,0);
+  group.add(foot);
+ }
+
+ return group;
 }
 
-function nextWave(){
- wave++;
- spawnLeft=5+wave*3;
- spawnTimer=.5;
- monsters=[];
- shots=[];
- paused=false;
- updateUI();
- showToast("WAVE "+wave+" INCOMING!");
+function spawnMonster(){
+ let type;
+
+ if(wave%5===0&&spawnLeft===1){
+  type={
+   name:"MEGA GOO",color:0xff536c,
+   hp:25+wave*3,speed:2.1,
+   size:2.3,damage:22,points:150
+  };
+ }else{
+  const available=Math.min(monsterTypes.length,2+Math.floor(wave/2));
+  type=monsterTypes[Math.floor(Math.random()*available)];
+ }
+
+ const angle=Math.random()*Math.PI*2;
+ const distance=25;
+ const x=Math.cos(angle)*distance;
+ const z=Math.sin(angle)*distance;
+ const scale=1+Math.max(0,wave-1)*.09;
+
+ const model=createMonsterModel(type.color,type.size);
+ model.position.set(x,0,z);
+ scene.add(model);
+
+ monsters.push({
+  model,x,z,
+  hp:type.hp*scale,
+  maxHp:type.hp*scale,
+  speed:type.speed+Math.min(wave*.12,4),
+  damage:type.damage,
+  points:type.points,
+  size:type.size,
+  hit:0,
+  boss:type.name==="MEGA GOO",
+  bob:Math.random()*6
+ });
+}
+
+// ---------------------------------
+// PROJECTILES
+// ---------------------------------
+
+function shoot(){
+ if(!running||paused||gameOver||!player||fireTimer>0)return;
+
+ fireTimer=player.fireRate;
+
+ const target=new THREE.Vector3(
+  aimPoint.x,1.3,aimPoint.z
+ );
+
+ const direction=target.clone().sub(
+  player.group.position.clone().add(new THREE.Vector3(0,1.3,0))
+ ).normalize();
+
+ const angle=Math.atan2(direction.x,direction.z);
+
+ for(let i=0;i<player.spread;i++){
+  const offset=(i-(player.spread-1)/2)*.13;
+  const a=angle+offset;
+
+  const velocity=new THREE.Vector3(
+   Math.sin(a),0,Math.cos(a)
+  ).multiplyScalar(24);
+
+  const orb=new THREE.Mesh(
+   new THREE.SphereGeometry(player.shotSize,12,10),
+   new THREE.MeshStandardMaterial({
+    color:0x9dffff,
+    emissive:0x31bfff,
+    emissiveIntensity:2
+   })
+  );
+
+  orb.position.copy(player.group.position);
+  orb.position.y=1.35;
+  orb.position.x+=Math.sin(a)*.8;
+  orb.position.z+=Math.cos(a)*.8;
+  orb.castShadow=true;
+  scene.add(orb);
+
+  projectiles.push({
+   mesh:orb,
+   velocity,
+   damage:player.damage,
+   pierce:player.pierce,
+   hit:[]
+  });
+ }
+}
+
+// ---------------------------------
+// PARTICLES
+// ---------------------------------
+
+function burst(position,color,count=12){
+ for(let i=0;i<count;i++){
+  const mesh=new THREE.Mesh(
+   new THREE.SphereGeometry(.09,6,6),
+   new THREE.MeshBasicMaterial({color})
+  );
+  mesh.position.copy(position);
+
+  const velocity=new THREE.Vector3(
+   (Math.random()-.5)*9,
+   Math.random()*7,
+   (Math.random()-.5)*9
+  );
+
+  scene.add(mesh);
+  effects.push({mesh,velocity,life:.6});
+ }
+}
+
+// ---------------------------------
+// GAME MANAGEMENT
+// ---------------------------------
+
+function showToast(text){
+ ui.toast.textContent=text;
+ ui.toast.classList.remove("hidden");
+ clearTimeout(toastTimeout);
+ toastTimeout=setTimeout(()=>{
+  ui.toast.classList.add("hidden");
+ },1700);
 }
 
 function updateUI(){
  ui.wave.textContent=wave;
  ui.score.textContent=score;
  ui.remaining.textContent=monsters.length+spawnLeft;
+
  if(player){
-  ui.health.style.width=Math.max(0,player.health/player.maxHealth*100)+"%";
-  ui.health.style.background=player.health<30?"#ff6262":"#52df85";
+  const percent=Math.max(0,player.health/player.maxHealth*100);
+  ui.health.style.width=percent+"%";
+  ui.health.style.background=percent<30?"#ff6262":"#54e18b";
  }
-}
 
-function showToast(text){
- ui.toast.textContent=text;
- ui.toast.classList.remove("hidden");
- clearTimeout(toastTimer);
- toastTimer=setTimeout(()=>ui.toast.classList.add("hidden"),1600);
-}
-
-function spawnMonster(){
- let type;
- if(wave%5===0 && spawnLeft===1){
-  type={name:"MEGA GOO",emoji:"👹",color:"#ff626e",
-   hp:25+wave*3,speed:42+wave*1.5,size:42,damage:22,points:150};
+ const boss=monsters.find(m=>m.boss);
+ if(boss){
+  ui.boss.style.display="block";
+  ui.bossHealth.style.width=
+   Math.max(0,boss.hp/boss.maxHp*100)+"%";
  }else{
-  const available=Math.min(monsterTypes.length,2+Math.floor(wave/2));
-  type=monsterTypes[Math.floor(Math.random()*available)];
- }
- const edge=Math.floor(Math.random()*4);
- let x,y;
- if(edge===0){x=Math.random()*W;y=-40}
- if(edge===1){x=W+40;y=Math.random()*H}
- if(edge===2){x=Math.random()*W;y=H+40}
- if(edge===3){x=-40;y=Math.random()*H}
- const scale=1+Math.max(0,wave-1)*.09;
- monsters.push({
-  x,y,r:type.size,hp:type.hp*scale,maxHp:type.hp*scale,
-  speed:type.speed+Math.min(wave*2,55),
-  damage:type.damage,points:type.points,
-  color:type.color,emoji:type.emoji,
-  hit:0,bob:Math.random()*6
- });
-}
-
-function fire(){
- if(!running||paused||gameOver||!player)return;
- if(fireTimer>0)return;
- fireTimer=player.fireRate;
- const angle=Math.atan2(mouse.y-player.y,mouse.x-player.x);
- const count=player.spread;
- for(let i=0;i<count;i++){
-  const offset=(i-(count-1)/2)*.15;
-  const a=angle+offset;
-  const speed=570;
-  shots.push({
-   x:player.x+Math.cos(a)*20,
-   y:player.y+Math.sin(a)*20,
-   vx:Math.cos(a)*speed,
-   vy:Math.sin(a)*speed,
-   r:player.shotSize,
-   damage:player.damage,
-   pierce:player.pierce,
-   hitIds:[]
-  });
+  ui.boss.style.display="none";
  }
 }
 
-function addParticles(x,y,color,count=8){
- for(let i=0;i<count;i++){
-  const a=Math.random()*Math.PI*2;
-  const s=40+Math.random()*150;
-  particles.push({
-   x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,
-   life:.35+Math.random()*.4,max:.75,
-   color,size:2+Math.random()*4
-  });
- }
-}
-
-function damagePlayer(amount){
- if(player.invulnerable>0)return;
- player.health-=amount*(1-player.armor);
- player.invulnerable=.55;
- addParticles(player.x,player.y,"#ff7373",10);
- if(player.health<=0)endGame();
+function nextWave(){
+ wave++;
+ spawnLeft=5+wave*3;
+ spawnTimer=1;
+ paused=false;
+ projectiles.forEach(p=>scene.remove(p.mesh));
+ projectiles=[];
  updateUI();
-}
-
-function endGame(){
- running=false;gameOver=true;
- document.getElementById("finalWave").textContent="You reached wave "+wave;
- document.getElementById("finalScore").textContent="Final score: "+score;
- ui.over.classList.remove("hidden");
+ showToast("WAVE "+wave+" INCOMING!");
 }
 
 function clearWave(){
  paused=true;
- ui.upgrades.classList.remove("hidden");
  showUpgrades();
 }
 
 function showUpgrades(){
+ ui.upgrades.classList.remove("hidden");
  ui.choices.innerHTML="";
+
  let pool=[...upgrades];
  let choices=[];
+
  while(choices.length<3&&pool.length){
   const i=Math.floor(Math.random()*pool.length);
   choices.push(pool.splice(i,1)[0]);
  }
+
  choices.forEach(up=>{
-  const btn=document.createElement("button");
-  btn.className="upgrade";
-  btn.innerHTML='<span class="emoji">'+up.emoji+'</span><strong>'+
-   up.name+'</strong><small>'+up.desc+'</small>';
-  btn.onclick=()=>{
+  const button=document.createElement("button");
+  button.className="upgrade";
+  button.innerHTML=
+   '<div class="emoji">'+up.emoji+'</div>'+
+   '<strong>'+up.name+'</strong>'+
+   '<small>'+up.desc+'</small>';
+
+  button.onclick=()=>{
    up.apply(player);
    ui.upgrades.classList.add("hidden");
    showToast(up.name+" UNLOCKED!");
    updateUI();
    nextWave();
   };
-  ui.choices.appendChild(btn);
+
+  ui.choices.appendChild(button);
  });
 }
 
-function update(dt){
- if(!running||paused||gameOver)return;
- dt=Math.min(dt,.04);
- fireTimer=Math.max(0,fireTimer-dt);
- player.invulnerable=Math.max(0,player.invulnerable-dt);
-
- let dx=0,dy=0;
- if(keys["w"]||keys["arrowup"])dy--;
- if(keys["s"]||keys["arrowdown"])dy++;
- if(keys["a"]||keys["arrowleft"])dx--;
- if(keys["d"]||keys["arrowright"])dx++;
- const len=Math.hypot(dx,dy)||1;
- player.x+=dx/len*player.speed*dt;
- player.y+=dy/len*player.speed*dt;
- player.x=Math.max(player.r,Math.min(W-player.r,player.x));
- player.y=Math.max(player.r,Math.min(H-player.r,player.y));
-
- if(mouse.down||keys[" "])fire();
-
- spawnTimer-=dt;
- if(spawnLeft>0&&spawnTimer<=0){
-  spawnMonster();
-  spawnLeft--;
-  spawnTimer=Math.max(.28,.95-wave*.035);
- }
-
- for(let i=monsters.length-1;i>=0;i--){
-  const m=monsters[i];
-  const a=Math.atan2(player.y-m.y,player.x-m.x);
-  m.x+=Math.cos(a)*m.speed*dt;
-  m.y+=Math.sin(a)*m.speed*dt;
-  m.hit=Math.max(0,m.hit-dt);
-  m.bob+=dt*4;
-  if(Math.hypot(player.x-m.x,player.y-m.y)<player.r+m.r){
-   damagePlayer(m.damage*dt*2);
-  }
- }
-
- for(let i=shots.length-1;i>=0;i--){
-  const s=shots[i];
-  s.x+=s.vx*dt;s.y+=s.vy*dt;
-  let remove=false;
-  if(s.x<-30||s.x>W+30||s.y<-30||s.y>H+30)remove=true;
-  for(let j=monsters.length-1;j>=0&&!remove;j--){
-   const m=monsters[j];
-   if(s.hitIds.includes(m))continue;
-   if(Math.hypot(s.x-m.x,s.y-m.y)<s.r+m.r){
-    m.hp-=s.damage;m.hit=.1;
-    addParticles(s.x,s.y,"#8ff7ff",3);
-    s.hitIds.push(m);
-    if(m.hp<=0){
-     score+=m.points;
-     addParticles(m.x,m.y,m.color,15);
-     monsters.splice(j,1);
-     updateUI();
-    }
-    if(s.pierce>0)s.pierce--;
-    else remove=true;
-   }
-  }
-  if(remove)shots.splice(i,1);
- }
-
- for(let i=particles.length-1;i>=0;i--){
-  const p=particles[i];
-  p.x+=p.vx*dt;p.y+=p.vy*dt;
-  p.life-=dt;p.vx*=.97;p.vy*=.97;
-  if(p.life<=0)particles.splice(i,1);
- }
-
- updateUI();
- if(spawnLeft===0&&monsters.length===0)clearWave();
+function endGame(){
+ running=false;
+ gameOver=true;
+ ui.boss.style.display="none";
+ document.getElementById("finalWave").textContent=
+  "You reached wave "+wave;
+ document.getElementById("finalScore").textContent=
+  "Final score: "+score;
+ ui.over.classList.remove("hidden");
 }
 
-function drawBackground(){
- ctx.fillStyle="#151a2b";
- ctx.fillRect(0,0,W,H);
- ctx.strokeStyle="#242b40";
- ctx.lineWidth=1;
- const gap=42;
- for(let x=0;x<W;x+=gap){
-  ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();
- }
- for(let y=0;y<H;y+=gap){
-  ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
- }
-}
-
-function draw(){
- ctx.clearRect(0,0,W,H);
- drawBackground();
-
- // Energy projectiles
- shots.forEach(s=>{
-  ctx.save();
-  ctx.shadowBlur=16;ctx.shadowColor="#78f7ff";
-  ctx.fillStyle="#b6ffff";
-  ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();
-  ctx.restore();
- });
-
- // Monsters
- monsters.forEach(m=>{
-  ctx.save();
-  ctx.translate(m.x,m.y+Math.sin(m.bob)*3);
-  ctx.fillStyle=m.hit>0?"white":m.color;
-  ctx.shadowBlur=12;ctx.shadowColor=m.color;
-  ctx.beginPath();ctx.arc(0,0,m.r,0,Math.PI*2);ctx.fill();
-  ctx.shadowBlur=0;
-  ctx.font=Math.floor(m.r*1.45)+"px Arial";
-  ctx.textAlign="center";ctx.textBaseline="middle";
-  ctx.fillText(m.emoji,0,1);
-  // Health bar
-  if(m.hp<m.maxHp){
-   const bw=m.r*2;
-   ctx.fillStyle="#303040";ctx.fillRect(-bw/2,-m.r-10,bw,5);
-   ctx.fillStyle="#ff6464";
-   ctx.fillRect(-bw/2,-m.r-10,bw*Math.max(0,m.hp/m.maxHp),5);
-  }
-  ctx.restore();
- });
-
- // Player
+function startGame(){
  if(player){
-  const a=Math.atan2(mouse.y-player.y,mouse.x-player.x);
-  ctx.save();
-  ctx.translate(player.x,player.y);
-  ctx.rotate(a);
-  ctx.fillStyle="#ffd36a";
-  ctx.shadowBlur=15;ctx.shadowColor="#ffd36a";
-  ctx.fillRect(0,-7,27,14);
-  ctx.restore();
-
-  ctx.save();
-  ctx.globalAlpha=player.invulnerable>0?.55:1;
-  ctx.fillStyle="#65baff";
-  ctx.shadowBlur=15;ctx.shadowColor="#65baff";
-  ctx.beginPath();ctx.arc(player.x,player.y,player.r,0,Math.PI*2);ctx.fill();
-  ctx.shadowBlur=0;
-  ctx.fillStyle="white";
-  ctx.beginPath();ctx.arc(player.x+5,player.y-5,4,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.arc(player.x+5,player.y+5,4,0,Math.PI*2);ctx.fill();
-  ctx.restore();
+  scene.remove(player.group);
  }
 
- particles.forEach(p=>{
-  ctx.globalAlpha=Math.max(0,p.life/p.max);
-  ctx.fillStyle=p.color;
-  ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();
- });
- ctx.globalAlpha=1;
+ monsters.forEach(m=>scene.remove(m.model));
+ projectiles.forEach(p=>scene.remove(p.mesh));
+ effects.forEach(e=>scene.remove(e.mesh));
 
- if(!running&&!gameOver&&!ui.start.classList.contains("hidden")){
-  // Title screen is handled by the overlay.
+ monsters=[];
+ projectiles=[];
+ effects=[];
+
+ player=createPlayer();
+ wave=0;
+ score=0;
+ spawnLeft=0;
+ spawnTimer=0;
+ fireTimer=0;
+ running=true;
+ paused=false;
+ gameOver=false;
+
+ ui.start.classList.add("hidden");
+ ui.upgrades.classList.add("hidden");
+ ui.over.classList.add("hidden");
+
+ nextWave();
+ updateUI();
+}
+
+// ---------------------------------
+// INPUT AND AIMING
+// ---------------------------------
+
+function updatePointer(e){
+ const rect=renderer.domElement.getBoundingClientRect();
+
+ pointer.x=((e.clientX-rect.left)/rect.width)*2-1;
+ pointer.y=-((e.clientY-rect.top)/rect.height)*2+1;
+
+ raycaster.setFromCamera(pointer,camera);
+ raycaster.ray.intersectPlane(groundPlane,aimPoint);
+}
+
+renderer.domElement.addEventListener("mousemove",updatePointer);
+
+renderer.domElement.addEventListener("mousedown",e=>{
+ if(e.button===0){
+  updatePointer(e);
+  mouseDown=true;
  }
-}
-
-function loop(timestamp){
- const dt=(timestamp-lastTime)/1000||0;
- lastTime=timestamp;
- update(dt);
- draw();
- requestAnimationFrame(loop);
-}
-
-function getMouse(e){
- const rect=canvas.getBoundingClientRect();
- mouse.x=(e.clientX-rect.left)*(W/rect.width);
- mouse.y=(e.clientY-rect.top)*(H/rect.height);
-}
-
-canvas.addEventListener("mousemove",getMouse);
-canvas.addEventListener("mousedown",e=>{
- getMouse(e);mouse.down=true;
 });
-window.addEventListener("mouseup",()=>mouse.down=false);
-canvas.addEventListener("contextmenu",e=>e.preventDefault());
+
+window.addEventListener("mouseup",()=>{
+ mouseDown=false;
+});
+
+let mouseDown=false;
 
 window.addEventListener("keydown",e=>{
  const key=e.key.toLowerCase();
  keys[key]=true;
- if([" ","arrowup","arrowdown","arrowleft","arrowright"].includes(key))e.preventDefault();
+
+ if([" ","arrowup","arrowdown","arrowleft","arrowright"].includes(key)){
+  e.preventDefault();
+ }
 });
-window.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+
+window.addEventListener("keyup",e=>{
+ keys[e.key.toLowerCase()]=false;
+});
+
 window.addEventListener("blur",()=>{
- keys={};mouse.down=false;
+ keys={};
+ mouseDown=false;
 });
 
-document.getElementById("startBtn").addEventListener("click",startGame);
-document.getElementById("restartBtn").addEventListener("click",startGame);
+// ---------------------------------
+// CAMERA
+// ---------------------------------
 
-requestAnimationFrame(loop);
+function updateCamera(){
+ if(!player)return;
+
+ const target=player.group.position;
+
+ const cameraPosition=new THREE.Vector3(
+  target.x,
+  target.y+13,
+  target.z+17
+ );
+
+ camera.position.lerp(cameraPosition,.09);
+ camera.lookAt(target.x,target.y+1,target.z);
+}
+
+// ---------------------------------
+// MAIN UPDATE
+// ---------------------------------
+
+function update(dt){
+ if(!running||paused||gameOver||!player)return;
+
+ dt=Math.min(dt,.04);
+
+ fireTimer=Math.max(0,fireTimer-dt);
+ player.invulnerable=Math.max(0,player.invulnerable-dt);
+
+ // Player movement
+ let dx=0,dz=0;
+
+ if(keys.w||keys.arrowup)dz-=1;
+ if(keys.s||keys.arrowdown)dz+=1;
+ if(keys.a||keys.arrowleft)dx-=1;
+ if(keys.d||keys.arrowright)dx+=1;
+
+ const length=Math.hypot(dx,dz)||1;
+ const sprint=keys.shift?1.5:1;
+
+ player.group.position.x+=dx/length*player.speed*sprint*dt;
+ player.group.position.z+=dz/length*player.speed*sprint*dt;
+
+ player.group.position.x=THREE.MathUtils.clamp(
+  player.group.position.x,-27,27
+ );
+ player.group.position.z=THREE.MathUtils.clamp(
+  player.group.position.z,-27,27
+ );
+
+ // Turn toward aim
+ const angle=Math.atan2(
+  aimPoint.x-player.group.position.x,
+  aimPoint.z-player.group.position.z
+ );
+ player.group.rotation.y=angle;
+
+ if(mouseDown)shoot();
+
+ // Spawn monsters
+ spawnTimer-=dt;
+
+ if(spawnLeft>0&&spawnTimer<=0){
+  spawnMonster();
+  spawnLeft--;
+  spawnTimer=Math.max(.35,.95-wave*.035);
+ }
+
+ // Move monsters
+ for(let i=monsters.length-1;i>=0;i--){
+  const m=monsters[i];
+
+  const dx=player.group.position.x-m.x;
+  const dz=player.group.position.z-m.z;
+  const distance=Math.hypot(dx,dz)||1;
+
+  if(distance>1.7){
+   m.x+=dx/distance*m.speed*dt;
+   m.z+=dz/distance*m.speed*dt;
+  }else{
+   if(player.invulnerable<=0){
+    player.health-=m.damage*dt*1.5*(1-player.armor);
+    player.invulnerable=.2;
+    if(player.health<=0){
+     player.health=0;
+     updateUI();
+     endGame();
+     return;
+    }
+   }
+  }
+
+  m.model.position.set(m.x,0,m.z);
+  m.bob+=dt*3;
+  m.model.position.y=Math.sin(m.bob)*.12;
+
+  // Face player
+  m.model.rotation.y=Math.atan2(dx,dz);
+
+  // Flash briefly when hit
+  if(m.hit>0){
+   m.hit-=dt;
+  }
+ }
+
+ // Move projectiles and detect hits
+ for(let i=projectiles.length-1;i>=0;i--){
+  const p=projectiles[i];
+
+  p.mesh.position.addScaledVector(p.velocity,dt);
+
+  let remove=false;
+
+  if(Math.abs(p.mesh.position.x)>35||
+     Math.abs(p.mesh.position.z)>35){
+   remove=true;
+  }
+
+  for(let j=monsters.length-1;j>=0&&!remove;j--){
+   const m=monsters[j];
+
+   if(p.hit.includes(m))continue;
+
+   const distance=p.mesh.position.distanceTo(
+    new THREE.Vector3(m.x,m.size,m.z)
+   );
+
+   if(distance<m.size+.5){
+    m.hp-=p.damage;
+    m.hit=.15;
+    p.hit.push(m);
+
+    burst(p.mesh.position,0x8ff7ff,3);
+
+    if(m.hp<=0){
+     score+=m.points;
+     burst(m.model.position.clone().add(
+      new THREE.Vector3(0,m.size,0)
+     ),m.boss?0xff536c:0x8ff7ff,18);
+
+     scene.remove(m.model);
+     monsters.splice(j,1);
+     updateUI();
+    }
+
+    if(p.pierce>0){
+     p.pierce--;
+    }else{
+     remove=true;
+    }
+   }
+  }
+
+  if(remove){
+   scene.remove(p.mesh);
+   projectiles.splice(i,1);
+  }
+ }
+
+ // Particles
+ for(let i=effects.length-1;i>=0;i--){
+  const p=effects[i];
+  p.mesh.position.addScaledVector(p.velocity,dt);
+  p.velocity.y-=12*dt;
+  p.life-=dt;
+
+  if(p.life<=0){
+   scene.remove(p.mesh);
+   effects.splice(i,1);
+  }
+ }
+
+ updateUI();
+
+ if(spawnLeft===0&&monsters.length===0){
+  clearWave();
+ }
+}
+
+// ---------------------------------
+// ANIMATION LOOP
+// ---------------------------------
+
+function animate(time){
+ requestAnimationFrame(animate);
+
+ const dt=(time-lastTime)/1000||0;
+ lastTime=time;
+
+ update(dt);
+ updateCamera();
+
+ renderer.render(scene,camera);
+}
+
+// ---------------------------------
+// RESIZE
+// ---------------------------------
+
+window.addEventListener("resize",()=>{
+ camera.aspect=window.innerWidth/window.innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(window.innerWidth,window.innerHeight);
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+});
+
+// ---------------------------------
+// BUTTONS
+// ---------------------------------
+
+document.getElementById("startButton").onclick=startGame;
+document.getElementById("restartButton").onclick=startGame;
+
+requestAnimationFrame(animate);
+
 })();
 </script>
 </body>
